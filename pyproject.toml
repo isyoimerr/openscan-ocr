@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openscan-ocr"
+version = "0.1.0"
+description = "Open-source OCR toolkit for scanned PDFs and images, with reproducible benchmarks."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "OpenScan OCR Contributors"}]
+keywords = ["ocr", "tesseract", "gemini", "pdf", "streamlit", "benchmark"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Text Processing :: General",
+]
+dependencies = [
+  "Pillow>=10,<13",
+  "numpy>=1.26,<3",
+  "opencv-python-headless>=4.8,<5",
+  "pytesseract>=0.3.10,<1",
+  "pypdfium2>=4,<6",
+  "pypdf>=4,<7",
+  "pandas>=2,<4",
+]
+
+[project.optional-dependencies]
+web = ["streamlit>=1.38,<2", "google-genai>=1.0,<3"]
+research = ["matplotlib>=3.8,<4", "google-genai>=1.0,<3"]
+dev = ["pytest>=8,<10", "ruff>=0.9"]
+
+[project.urls]
+Repository = "https://github.com/isyoimerr/openscan-ocr"
+Issues = "https://github.com/isyoimerr/openscan-ocr/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[project.scripts]
+openscan-ocr = "openscan.cli:main"

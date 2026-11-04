@@ -1,0 +1,19 @@
+FACTURA DE DEMOSTRACION
+COMERCIO EJEMPLO
+NIT: 000.000.000-0
+Barranquilla, Colombia
+
+Factura: DEMO-0001
+Fecha: 04/11/2026
+Cliente: CLIENTE DE PRUEBA
+
+Cant.  Producto                 Valor
+2      Cuaderno                25000
+3      Lapicero                 9000
+1      Carpeta                  5000
+
+Subtotal                       39000
+IVA (19%):                      7410
+TOTAL                          46410
+
+Documento ficticio sin validez comercial.

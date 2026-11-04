@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+.pytest_cache
+*.pyc
+*.ipynb_checkpoints
+.env
+.streamlit/secrets.toml
+private
+private_data
+uploads
+results_local
+openscan_resultados

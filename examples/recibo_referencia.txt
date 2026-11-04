@@ -1,0 +1,15 @@
+RECIBO DE DEMOSTRACION
+TIENDA EJEMPLO
+Barranquilla, Colombia
+
+Recibo: DEMO-R02
+Fecha: 04/11/2026
+
+Arroz 1 kg                5800
+Leche 1 L                 4200
+Pan integral              6000
+
+SUBTOTAL                 16000
+TOTAL                    16000
+
+Documento ficticio para pruebas de OCR.

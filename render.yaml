@@ -1,0 +1,14 @@
+# OpenScan OCR public demo - Render Blueprint.
+# Deploy from a GitHub repository. No API key is required for local Tesseract.
+services:
+  - type: web
+    name: openscan-ocr
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /_stcore/health
+    autoDeployTrigger: checksPass
+    envVars:
+      # Cloud OCR intentionally disabled in the public demo to prevent API abuse.
+      - key: OPENSCAN_ENABLE_CLOUD
+        value: 'false'
