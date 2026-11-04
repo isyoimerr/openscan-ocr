@@ -40,23 +40,56 @@ st.markdown(
     .block-container {max-width: 1220px; padding-top: 2rem;}
     [data-testid="stMetric"] {padding: 14px 18px; border: 1px solid #263B4D;
          border-radius: 12px; background: #111E2E;}
-    .hero {background: linear-gradient(110deg, #11273B 0%, #132233 60%, #0C2530 100%);
+    .hero {background: linear-gradient(110deg, #0F2233 0%, #102B3A 50%, #0B1E29 100%);
            border: 1px solid #294358; padding: 28px 32px; border-radius: 18px;
-           margin-bottom: 24px;}
-    .hero h1 {font-size: 2.5rem; margin-bottom: 5px; letter-spacing: -0.055em;}
-    .hero p {font-size: 1rem; color: #B7CDD8; margin: 0; max-width: 730px;}
-    .eyebrow {color: #3AD9C3; letter-spacing: 0.14em; text-transform: uppercase;
-              font-size: 0.72rem; font-weight: 700; margin-bottom: 9px;}
+           margin-bottom: 24px; display: flex; align-items: center; gap: 26px;}
+    .brand-mark {width: 116px; height: 116px; border-radius: 28px; overflow: hidden;}
+    .brand-copy {display: flex; flex-direction: column; justify-content: center;}
+    .brand-copy h1 {font-size: 2.6rem; margin: 0; letter-spacing: -0.06em; line-height: 1.1;}
+    .brand-copy p {font-size: 1rem; color: #B7CDD8; margin: 0; max-width: 700px;}
+    .eyebrow {color: #3AD9C3; letter-spacing: 0.15em; text-transform: uppercase;
+              font-size: 0.72rem; font-weight: 700; margin-bottom: 8px;}
+    @media (max-width: 720px) {
+      .hero {flex-direction: column; align-items: flex-start;}
+      .brand-mark {width: 90px; height: 90px;}
+      .brand-copy h1 {font-size: 2rem;}
+    }
     </style>
-    <div class="hero">
-      <div class="eyebrow">OPEN SOURCE &nbsp; / &nbsp; OCR TOOLKIT</div>
-      <h1>OpenScan OCR</h1>
-      <p>Convierte imagenes y PDF escaneados en texto utilizable.
-         Procesa documentos, compara metodos y exporta resultados.</p>
-    </div>
     """,
     unsafe_allow_html=True,
 )
+
+brand_path = ROOT / "assets" / "brand" / "openscan-mark.png"
+if brand_path.exists():
+    brand_col, copy_col = st.columns([0.22, 1.2], gap="small")
+    with brand_col:
+        st.image(str(brand_path), width=120)
+    with copy_col:
+        st.markdown(
+            """
+            <div class="hero">
+              <div class="brand-copy">
+                <div class="eyebrow">OPEN SOURCE &nbsp; / &nbsp; OCR TOOLKIT</div>
+                <h1>OpenScan OCR</h1>
+                <p>Convierte imagenes y PDF escaneados en texto utilizable.
+                   Procesa documentos, compara metodos y exporta resultados.</p>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+else:
+    st.markdown(
+        """
+        <div class="hero">
+          <div class="eyebrow">OPEN SOURCE &nbsp; / &nbsp; OCR TOOLKIT</div>
+          <h1>OpenScan OCR</h1>
+          <p>Convierte imagenes y PDF escaneados en texto utilizable.
+             Procesa documentos, compara metodos y exporta resultados.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def read_secret(name: str) -> str:
