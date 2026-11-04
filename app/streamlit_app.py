@@ -112,19 +112,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-brand_path = ROOT / "assets" / "brand" / "openscan-mark.png"
+brand_path = ROOT / "Logotipo OpenScan OCR transparente.png"
 if brand_path.exists():
     with open(brand_path, "rb") as img_file:
         encoded = __import__("base64").b64encode(img_file.read()).decode("utf-8")
     hero_html = f"""
-    <div class="hero">
-      <div class="brand-mark-wrap">
-        <img src="data:image/png;base64,{encoded}" alt="OpenScan logo" />
-      </div>
-      <div class="brand-copy">
-        <div class="eyebrow">OPEN SOURCE &nbsp; / &nbsp; OCR TOOLKIT</div>
-        <h1>OpenScan OCR</h1>
-        <p>Convierte imagenes y PDF escaneados en texto utilizable. Procesa documentos, compara metodos y exporta resultados.</p>
+    <div class="hero" style="padding: 12px 20px; min-height: 160px;">
+      <div class="brand-mark-wrap" style="width: 210px; height: 120px; border:none; background:transparent; box-shadow:none; border-radius:0; display:flex; align-items:center; justify-content:flex-start;">
+        <img src="data:image/png;base64,{encoded}" alt="OpenScan logo" style="width: 100%; height: auto; max-width: 100%; object-fit: contain;" />
       </div>
     </div>
     """
