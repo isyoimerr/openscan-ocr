@@ -23,7 +23,10 @@ def rows_to_csv(rows: list[dict]) -> bytes:
     output = StringIO()
     writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, extrasaction="ignore")
     writer.writeheader()
-    writer.writerows(rows)
+    for row in rows:
+        if row.get("status") == "failed":
+            continue
+        writer.writerow(row)
     return output.getvalue().encode("utf-8-sig")
 
 
@@ -37,6 +40,8 @@ def texts_to_zip(entries: list[tuple[str, int, str, str]]) -> bytes:
     output = BytesIO()
     with ZipFile(output, "w", compression=ZIP_DEFLATED) as archive:
         for index, (filename, page, engine, text) in enumerate(entries):
+            if text is None:
+                continue
             filename = f"{safe_stem(filename)}_pagina_{page}_{engine.lower()}_{index}.txt"
             archive.writestr(filename, text)
     return output.getvalue()
@@ -45,19 +50,25 @@ def texts_to_zip(entries: list[tuple[str, int, str, str]]) -> bytes:
 def images_to_searchable_pdf(
     images: list[Image.Image], *, lang: str = "spa", psm: int = 6
 ) -> bytes:
-    """Generate a PDF with Tesseract's invisible text layer on each image."""
+    """Generate a PDF with Tesseract's invisible text layer on each image.
+
+    This is a second OCR pass over the same page content, so it may fail or take longer
+    than the first read. The caller must decide whether to include only successfully OCR'd images.
+    """
     if not images:
         raise ValueError("No hay paginas para exportar.")
     if psm not in {3, 4, 6, 11}:
         raise ValueError("PSM invalido.")
+
     writer = PdfWriter()
     for image in images:
+        timeout = max(10.0, min(35.0, 12.0 + (image.width * image.height) / 2_500_000 * 10.0))
         page_pdf = pytesseract.image_to_pdf_or_hocr(
             image.convert("RGB"),
             lang=lang,
             config=f"--oem 1 --psm {psm}",
             extension="pdf",
-            timeout=45,
+            timeout=timeout,
         )
         reader = PdfReader(BytesIO(page_pdf))
         writer.add_page(reader.pages[0])

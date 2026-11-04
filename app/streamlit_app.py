@@ -93,9 +93,9 @@ if not languages:
     st.stop()
 
 st.sidebar.header("Configuracion")
-st.sidebar.caption("Todo funciona localmente con Tesseract, sin clave API.")
+st.sidebar.caption("Tesseract se ejecuta en el servidor de Render; no en tu dispositivo.")
 
-engine_options = ["Tesseract (local)"]
+engine_options = ["Tesseract (local en el servidor)"]
 if api_key:
     engine_options += ["Gemini (nube)", "Comparar ambos"]
 engine_selection = st.sidebar.radio("Motor OCR", engine_options, index=0)
@@ -145,7 +145,7 @@ with col_upload:
         "Demo publica: usa solamente archivos de prueba o documentos que puedas compartir. "
         "El OCR se ejecuta en el servidor del proyecto, no en tu dispositivo."
     )
-    if engine_selection != "Tesseract (local)":
+    if engine_selection != "Tesseract (local en el servidor)":
         st.warning(
             "Gemini envia las imagenes a la API externa de Google. "
             "No lo utilices con documentos privados sin autorizacion."
@@ -211,38 +211,55 @@ if start:
         elif engine_selection == "Comparar ambos":
             engines = ["Tesseract", "Gemini"]
 
-        rows = []
-        entries = []
-        operations = [(page, engine) for page in all_pages for engine in engines]
+        attempt_reference = reference.strip() if len(all_pages) == 1 and reference.strip() else None
+        total_operations = len(all_pages) * len(engines)
         progress = st.progress(0, text="Extrayendo texto...")
-        for index, (page, engine) in enumerate(operations):
-            try:
-                row, result = process_page(
-                    page,
-                    engine=engine,
-                    preprocessing=preprocessing,
-                    lang=language,
-                    psm=psm,
-                    reference=reference.strip() if len(all_pages) == 1 and reference.strip() else None,
-                    gemini_key=api_key,
-                    gemini_model=gemini_model,
-                )
-                rows.append(row)
-                entries.append((page.source_name, page.page_number, engine, result.text))
-            except Exception as exc:
-                problems.append(f"{page.label} / {engine}: {str(exc)[:170]}")
-            progress.progress(
-                (index + 1) / len(operations),
-                text=f"Procesadas {index + 1}/{len(operations)} operaciones",
-            )
+        summary = {"rows": [], "entries": [], "failures": [], "attempted": 0, "completed": 0, "failed": 0}
+        for index, page in enumerate(all_pages):
+            for engine in engines:
+                try:
+                    row, result = process_page(
+                        page,
+                        engine=engine,
+                        preprocessing=preprocessing,
+                        lang=language,
+                        psm=psm,
+                        reference=attempt_reference,
+                        gemini_key=api_key,
+                        gemini_model=gemini_model,
+                    )
+                except Exception as exc:
+                    summary["failures"].append({"page": page, "engine": engine, "error": str(exc)[:220]})
+                    progress.progress((index * len(engines) + 1 + list(engines).index(engine)) / total_operations,
+                                      text=f"Procesadas {index + 1}/{len(all_pages)} paginas ({engine})")
+                    continue
+
+                if row.get("status") == "failed":
+                    summary["failures"].append({"page": page, "engine": engine, "error": row.get("error", "OCR fallido")})
+                    progress.progress((index * len(engines) + 1 + list(engines).index(engine)) / total_operations,
+                                      text=f"Procesadas {index + 1}/{len(all_pages)} paginas ({engine})")
+                    continue
+
+                summary["rows"].append(row)
+                summary["entries"].append((page.source_name, page.page_number, engine, result.text))
+                progress.progress((index * len(engines) + 1 + list(engines).index(engine)) / total_operations,
+                                  text=f"Procesadas {index + 1}/{len(all_pages)} paginas ({engine})")
+
+        summary["attempted"] = len(all_pages) * len(engines)
+        summary["completed"] = len(summary["rows"])
+        summary["failed"] = len(summary["failures"])
         progress.empty()
         st.session_state["openscan_report"] = {
-            "rows": rows,
-            "entries": entries,
+            "rows": summary["rows"],
+            "entries": summary["entries"],
             "pages": all_pages,
             "issues": problems,
             "language": language,
             "psm": psm,
+            "attempted": summary["attempted"],
+            "completed": summary["completed"],
+            "failed": summary["failed"],
+            "failures": summary["failures"],
         }
         st.session_state.pop("openscan_pdf", None)
 
@@ -253,17 +270,30 @@ if report:
     rows = report["rows"]
     entries = report["entries"]
     pages = report["pages"]
+    attempted = report.get("attempted", len(pages))
+    completed = report.get("completed", len(rows))
+    failed = report.get("failed", max(attempted - completed, 0))
+    failures = report.get("failures", [])
 
     for issue in report["issues"]:
         st.warning(issue)
 
+    if failures:
+        st.warning(f"Se detectaron {failed} paginas fallidas. Las paginas con OCR correcto siguen disponibles.")
+        for item in failures:
+            page = item["page"]
+            error = item["error"]
+            st.caption(f"{page.label} / {item['engine']}: {error}")
+
     if rows:
         data = pd.DataFrame(rows)
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Paginas procesadas", len(pages))
-        c2.metric("Lecturas completadas", len(rows))
-        c3.metric("Caracteres detectados", f"{data['caracteres'].sum():,}")
-        c4.metric("Tiempo OCR total", f"{data['tiempo_segundos'].sum():.2f} s")
+        c1.metric("Paginas intentadas", attempted)
+        c2.metric("Paginas completadas", completed)
+        c3.metric("Paginas fallidas", failed)
+        c4.metric("Caracteres detectados", f"{data['caracteres'].sum():,}")
+        if len(data) > 0:
+            st.metric("Tiempo OCR total", f"{data['tiempo_segundos'].sum():.2f} s")
 
         tab_text, tab_metrics, tab_export = st.tabs(
             ["Texto reconocido", "Analisis y comparacion", "Descargas"]
@@ -321,8 +351,8 @@ if report:
             st.divider()
             st.markdown("**PDF buscable**")
             st.caption(
-                "Crea un nuevo PDF con capa de texto usando Tesseract. "
-                "Se incluyen todas las paginas cargadas en un unico archivo."
+                "Crea un nuevo PDF con capa de texto usando otra pasada de Tesseract. "
+                "Este paso puede fallar de forma independiente y solo debe usarse si hay paginas OCR correctas."
             )
             if st.button("Generar PDF buscable"):
                 with st.spinner("Generando PDF con texto seleccionable..."):

@@ -1,127 +1,222 @@
-<div align="center">
+<p align="center">
+  <img src="assets/brand/openscan-logo-light.png" alt="OpenScan OCR logo" width="520" />
+</p>
 
-# OpenScan OCR
+<h1 align="center">OpenScan OCR</h1>
 
-**De documentos escaneados a texto utilizable.**
+<p align="center">
+  <strong>OCR abierto para documentos escaneados, imágenes y flujos reproducibles.</strong><br />
+  <a href="https://openscan-ocr.onrender.com/">Probar demo</a> ·
+  <a href="https://colab.research.google.com/github/isyoimerr/openscan-ocr/blob/main/research/openscan_public_demo.ipynb">Abrir en Colab</a> ·
+  <a href="research/ANALISIS_RESULTADOS.md">Ver investigación</a> ·
+  <a href="CONTRIBUTING.md">Contribuir</a>
+</p>
 
-OCR abierto para imágenes y PDF: investigación reproducible, motor reutilizable y una interfaz web lista para probar.
+OpenScan OCR es un toolkit de código abierto para convertir PDFs y fotografías escaneadas en texto usable, datos exportables y documentos PDF buscables. Está pensado como una base técnica reutilizable para automatizar la lectura de documentos, comparar métodos y documentar resultados con evidencia reproducible.
 
-[![CI](https://github.com/isyoimerr/openscan-ocr/actions/workflows/ci.yml/badge.svg)](https://github.com/isyoimerr/openscan-ocr/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB)
-![License](https://img.shields.io/badge/License-MIT-2AA198)
-![Status](https://img.shields.io/badge/Status-Prototype-303B4B)
-
-[**Ver el cuaderno en Colab**](https://colab.research.google.com/github/isyoimerr/openscan-ocr/blob/main/research/openscan_public_demo.ipynb) · [Instalación](docs/INSTALL.md) · [Despliegue en Render](docs/DEPLOY_RENDER.md) · [Método de evaluación](docs/METHODOLOGY.md) · [Roadmap](docs/ROADMAP.md)
-
-</div>
+> La demostración pública ejecuta Tesseract en el servidor del proyecto. Gemini no está activo por defecto y no forma parte de la experiencia pública.
 
 ---
 
-## ¿Qué problema resuelve?
+## Problema y propuesta
 
-Muchos documentos llegan como una foto o un PDF escaneado: se ven, pero su texto no se puede buscar, copiar ni analizar fácilmente. OpenScan convierte esos archivos en **texto, datos exportables y PDF buscables**, sin exigir a las personas aprender a programar.
+Muchos documentos llegan como imágenes o PDFs escaneados: se visualizan, pero su contenido no es searchable, editable ni fácil de procesar automáticamente. OpenScan aporta una pila ligera para:
 
-La herramienta utiliza **Tesseract de forma local, sin clave API**, y permite comparar el resultado con **Gemini** opcionalmente si el responsable configura una clave en el servidor.
+- leer imágenes y PDFs escaneados;
+- aplicar preprocesamiento para mejorar la OCR;
+- elegir modos de segmentación y lenguaje;
+- exportar texto, CSV y PDF buscable;
+- comparar resultados de forma transparente con métricas como CER y WER.
 
-### Funciones disponibles
+La propuesta no promete exactitud universal. La intención es ofrecer una base clara, abierta y verificable para documentos de tipo administrativo o documental, con límites explícitos y resultados reproducibles.
 
-| Función | Estado |
+## Qué incluye hoy
+
+| Capacidad | Estado |
 | --- | --- |
-| Leer PNG, JPG, WEBP y PDF escaneados | Disponible |
-| Procesar varios documentos y páginas | Disponible |
-| Probar original, gris, Otsu y adaptativa | Disponible |
-| Seleccionar PSM e idioma de Tesseract | Disponible |
-| OCR con Gemini (opcional, por API) | Disponible, condicionado a acceso a API |
-| Comparar tiempo y error CER/WER con referencia | Disponible |
-| Descargar CSV y transcripciones TXT en ZIP | Disponible |
-| Generar PDF con texto buscable (Tesseract) | Disponible |
-| Validación humana de campos y extracción estructurada | Planificado |
+| Lectura de PNG, JPG, WEBP y PDF escaneados | Disponible |
+| Procesado por páginas y lotes pequeños | Disponible |
+| Preprocesamiento original, gris, Otsu y adaptativo | Disponible |
+| Selección de PSM y idioma Tesseract | Disponible |
+| Comparación de tiempos y métricas CER/WER con referencia | Disponible |
+| Exportación a CSV, TXT y ZIP | Disponible |
+| Generación de PDF con texto buscable | Disponible |
+| Gemini opcional por API | Beta / solo si se configura el servidor |
+| Revisión humana de campos o extracción estructurada | Planificado |
 
-## Ejecutar en 3 pasos
+---
 
-Necesitas Python 3.10+ y el programa **Tesseract OCR** instalado en el equipo.
+## Arquitectura y funcionamiento
 
-```bash
-# Ubuntu / Debian
-sudo apt-get update
-sudo apt-get install -y tesseract-ocr tesseract-ocr-spa
+OpenScan está organizado como una herramienta técnica incremental, no como un servicio de precisión mágica.
 
-git clone https://github.com/isyoimerr/openscan-ocr.git
-cd openscan-ocr
-python -m pip install -e '.[web]'
-streamlit run app/streamlit_app.py
-```
+1. Entrada: imágenes o PDFs de origen escaneado.
+2. Preprocesamiento: ajusta brillo, contraste, normalización, binarización y limpieza antes del OCR.
+3. Motor OCR: usa Tesseract local como base; el motor puede combinarse con Gemini si el operador lo habilita explícitamente.
+4. Métricas: cuando hay texto de referencia, calcula CER, WER y tiempos de ejecución.
+5. Exportación: genera resultados para análisis, comparación y reutilización.
+6. Interfaz: una app web con Streamlit para probar rápidamente el flujo sin necesidad de programar.
 
-Abre la dirección local que muestre Streamlit, sube una imagen o PDF y presiona **Procesar documentos**. Para Windows, macOS y despliegue web consulta [la guía](docs/INSTALL.md).
+La lógica principal vive en [src/openscan](src/openscan), y la interfaz de prueba en [app/streamlit_app.py](app/streamlit_app.py).
 
-> **Privacidad:** en la aplicación web, Tesseract procesa los archivos en el **servidor** (no en el dispositivo del visitante). No subas documentos sensibles a una demo pública. Gemini está desactivado por defecto para evitar consumo no autorizado de la API. Si el responsable lo activa, los documentos elegidos para ese motor se envían también a Google.
+---
 
-### Tambien desde la terminal
+## Investigación y evidencia técnica
 
-```bash
-openscan-ocr examples/facturas_demo_3paginas.pdf --pdf-buscable
-```
+Este repositorio incluye una línea de investigación reproducible basada en documentos sintéticos creados para el proyecto. El foco está en documentar cómo cambian los resultados al variar los parámetros del preprocesamiento y la segmentación.
 
-Esto genera archivos de texto, CSV y PDF buscable en `results_local/`.
+La ejecución actual usa 27 combinaciones:
 
-## Investigación abierta: ¿cómo se evaluó?
+- 3 imágenes sintéticas 
+- 3 métodos de preprocesamiento
+- 3 modos PSM de Tesseract
 
-El repositorio incluye **3 variaciones sintéticas de una factura** y su transcripción de referencia. Se ejecutaron 27 pruebas con Tesseract: 3 imágenes × 3 métodos de preprocesamiento × 3 PSM.
+Los indicadores principales son CER y WER frente a una referencia conocida. El repositorio deja claro que estos resultados no deben interpretarse como métricas universales para cualquier documento real.
 
-| Configuración | CER medio en las pruebas de ejemplo |
+| Configuración | CER medio |
 | --- | ---: |
-| Sin binarización | 1,67 % |
-| Otsu | 1,15 % |
-| Adaptativa | 1,15 % |
-| PSM 4 (todos los tratamientos) | 0,11 % |
-| PSM 6 (todos los tratamientos) | 0,04 % |
-| PSM 11 (todos los tratamientos) | 3,81 % |
+| Sin binarización | 1.67 % |
+| Otsu | 1.15 % |
+| Adaptativa | 1.15 % |
+| PSM 4 | 0.11 % |
+| PSM 6 | 0.04 % |
+| PSM 11 | 3.81 % |
 
-**Importante:** estos resultados corresponden únicamente a documentos artificiales creados para el proyecto; **no son evidencia de precisión real con cualquier documento**, ni una comparación general entre Gemini y Tesseract. El CER requiere un texto de referencia fiable. [Consulta los datos originales](research/resultados_tesseract.csv) y [la metodología](docs/METHODOLOGY.md).
+Estos valores se basan en documentos sintéticos y sirven para validar la metodología, no para afirmar precisión general. La explicación completa está en [research/ANALISIS_RESULTADOS.md](research/ANALISIS_RESULTADOS.md) y [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
 
-Reproduce el experimento:
+### Reproducir el benchmark
 
 ```bash
 python research/run_benchmark.py
 ```
 
-O utiliza [el cuaderno público de Google Colab](research/openscan_public_demo.ipynb), sin necesidad de instalar nada en tu computador. El uso de Gemini es opcional y requiere clave propia.
+También puedes probar el flujo completo en Google Colab:
 
-### Documentos de prueba
+- [Colab público](https://colab.research.google.com/github/isyoimerr/openscan-ocr/blob/main/research/openscan_public_demo.ipynb)
+- [Resultados de referencia](research/resultados_tesseract.csv)
 
-<details>
-<summary>Ver muestras generadas (datos ficticios)</summary>
+---
 
-<img src="examples/factura_01_limpia.png" width="210" alt="Ejemplo limpio" />
-<img src="examples/factura_02_inclinada.png" width="210" alt="Ejemplo inclinado" />
-<img src="examples/factura_03_ruido.png" width="210" alt="Ejemplo con ruido" />
+## Evolución del desarrollo y versiones
 
-</details>
+OpenScan nace como una herramienta práctica y modular, con una iteración clara del producto:
 
-## Estructura del proyecto
+- v0.1.0: motor OCR local reutilizable, benchmark reproducible, interfaz web, exportación y documentación base.
+- v0.2: mejor calidad de experiencia, revisión del texto y análisis visual más sólido.
+- v0.3: extracción de campos y salida estructurada.
+- v1.0: estabilización, despliegue serio y gobernanza técnica.
 
-```text
-openscan-ocr/
-  app/          Interfaz Streamlit
-  src/openscan/ Motor OCR, PDF, CLI, preprocesamiento y exportacion
-  research/     Cuaderno publico y datos de pruebas reproducibles
-  examples/     Imagenes, PDF y textos totalmente ficticios
-  tests/        Pruebas automatizadas
-  docs/         Metodologia, instalacion, hoja de ruta y seguridad
+El roadmap de evolución está en [docs/ROADMAP.md](docs/ROADMAP.md).
+
+---
+
+## Prototipo web y funcionalidades reales
+
+La aplicación web demuestra el flujo completo de uso real: carga documentos, ajusta parámetros, procesa el OCR y exporta entregables.
+
+<p align="center">
+  <img src="assets/screenshots/01-carga-documentos.png" alt="Pantalla de carga de OpenScan OCR" width="980" />
+</p>
+
+### Ejemplo de flujo
+
+1. Subir una imagen o PDF escaneado.
+2. Elegir método de preprocesamiento y modo Tesseract.
+3. Añadir referencia opcional para calcular CER y WER.
+4. Ejecutar el proceso y revisar resultados.
+5. Exportar CSV, ZIP y PDF buscable.
+
+> La demo pública usa Tesseract en el servidor del proyecto. No subas documentos sensibles ni personales a una instancia pública.
+
+---
+
+## Instalación y uso local
+
+### Requisitos
+
+- Python 3.10+
+- Tesseract OCR instalado y accesible en el `PATH`
+- Un navegador actualizado
+
+### Linux / Ubuntu
+
+```bash
+sudo apt-get update
+sudo apt-get install -y tesseract-ocr tesseract-ocr-spa
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[web]'
+streamlit run app/streamlit_app.py
 ```
 
-## Tecnologías
+### Windows
 
-Python · Tesseract · OpenCV · PDFium · Streamlit · Pandas · Google Gen AI SDK (opcional).
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -e ".[web]"
+streamlit run app/streamlit_app.py
+```
 
-## Publicar tu propio repositorio
+### macOS
 
-Consulta [la guia de publicacion](docs/PUBLISH_TO_GITHUB.md).
+```bash
+brew install tesseract tesseract-lang
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[web]'
+streamlit run app/streamlit_app.py
+```
 
-## Contribuir
+Más detalles en [docs/INSTALL.md](docs/INSTALL.md).
 
-Aceptamos mejoras de preprocesamiento, idiomas, pruebas con documentos **anonimizados** y mejoras de experiencia de usuario. Consulta [CONTRIBUTING.md](CONTRIBUTING.md), abre un [issue](https://github.com/isyoimerr/openscan-ocr/issues) o propone un pull request.
+### Google Colab
 
-**Estado:** prototipo funcional `v0.1.0`, preparado para despliegue de demostración en Render. No incluye autenticación, cuotas por usuario ni protección contra abuso; consulta [ROADMAP](docs/ROADMAP.md) antes de utilizarlo en producción.
+El cuaderno público permite probar el proyecto sin preparar un entorno local:
 
-**Licencia:** [MIT](LICENSE).
+- [Abrir en Colab](https://colab.research.google.com/github/isyoimerr/openscan-ocr/blob/main/research/openscan_public_demo.ipynb)
+
+### Gemini opcional
+
+Gemini es un motor adicional, no un requisito. Si se habilita, debe configurarse explícitamente con secretos del entorno o de la instancia privada. En la demo pública queda desactivado.
+
+---
+
+## Roadmap, licencia y contribuciones
+
+### Roadmap
+
+- Mejoras de calidad en la experiencia y revisión del texto.
+- Corrección de orientación y preparación de documentos.
+- Extracción estructurada de campos y salidas JSON/CSV.
+- Mayor variedad de datasets y validación reproducible.
+
+Consulta [docs/ROADMAP.md](docs/ROADMAP.md).
+
+### Contribuir
+
+Las contribuciones bienvenidas incluyen:
+
+- mejoras de preprocesamiento;
+- soporte de nuevos idiomas y modos OCR;
+- validación de casos del mundo real con documentos autorizados y anonimizados;
+- mejoras en UX, accesibilidad y documentación.
+
+Consulta [CONTRIBUTING.md](CONTRIBUTING.md) y abre una incidencia o PR en GitHub.
+
+### Licencia
+
+OpenScan OCR se distribuye bajo la licencia [MIT](LICENSE).
+
+---
+
+<p align="center">
+  <img src="assets/brand/openscan-mark.png" alt="OpenScan icon" width="92" />
+</p>
+
+<p align="center">
+  <a href="https://openscan-ocr.onrender.com/">Demo</a> ·
+  <a href="https://colab.research.google.com/github/isyoimerr/openscan-ocr/blob/main/research/openscan_public_demo.ipynb">Colab</a> ·
+  <a href="research/ANALISIS_RESULTADOS.md">Investigación</a> ·
+  <a href="CONTRIBUTING.md">Contribuir</a>
+</p>

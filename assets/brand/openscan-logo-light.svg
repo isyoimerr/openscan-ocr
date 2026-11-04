@@ -1,0 +1,29 @@
+<svg width="760" height="220" viewBox="0 0 760 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="22" y1="14" x2="174" y2="174" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123B52"/>
+      <stop offset="0.55" stop-color="#0B2432"/>
+      <stop offset="1" stop-color="#091C2B"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="52" y1="30" x2="142" y2="154" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60F1D8"/>
+      <stop offset="1" stop-color="#2EC4B6"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(0 0)">
+    <rect x="16" y="18" width="166" height="166" rx="38" fill="url(#bg)"/>
+    <rect x="49" y="52" width="98" height="98" rx="20" fill="#081B29" stroke="url(#accent)" stroke-width="5"/>
+    <path d="M110 52V66C110 71.5228 105.523 76 100 76H82" stroke="url(#accent)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M62 86H108" stroke="#E7F8FF" stroke-width="5" stroke-linecap="round" opacity="0.77"/>
+    <path d="M62 102H118" stroke="#E7F8FF" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+    <path d="M62 118H98" stroke="#E7F8FF" stroke-width="5" stroke-linecap="round" opacity="0.42"/>
+    <circle cx="117" cy="102" r="21" stroke="url(#accent)" stroke-width="6" fill="none"/>
+    <path d="M130 116L142 128" stroke="#60F1D8" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(220 52)">
+    <text x="0" y="52" fill="#0D1B2A" font-family="Segoe UI, Arial, sans-serif" font-size="56" font-weight="700" letter-spacing="-1.8">OpenScan</text>
+    <text x="1" y="110" fill="#2EC4B6" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="4">OCR</text>
+    <path d="M2 128H316" stroke="#D6E7EE" stroke-width="2"/>
+    <text x="0" y="158" fill="#44596A" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" letter-spacing="1.2">documentos escaneados → texto útil</text>
+  </g>
+</svg>

@@ -35,11 +35,19 @@ if resolved_tesseract:
     pytesseract.pytesseract.tesseract_cmd = resolved_tesseract
 
 GEMINI_DEFAULT_MODEL = "gemini-3.6-flash"
+DEFAULT_TESSERACT_TIMEOUT = 30.0
 TRANSCRIPTION_PROMPT = (
     "Transcribe exactamente el texto visible en esta imagen. "
     "Respeta numeros, signos y orden de lectura. "
     "No inventes contenido. Devuelve solo la transcripcion."
 )
+
+
+def tesseract_timeout_for_image(image: Image.Image, *, base_timeout: float = DEFAULT_TESSERACT_TIMEOUT) -> float:
+    """Set a conservative timeout based on image size instead of a single fixed timeout."""
+    pixels = max(1, image.width * image.height)
+    scaled = base_timeout + max(0.0, min(20.0, pixels / 2_500_000 * 10.0))
+    return max(10.0, min(35.0, scaled))
 
 
 @dataclass
@@ -61,18 +69,32 @@ def available_tesseract_languages() -> list[str]:
         return []
 
 
-def run_tesseract(image: Image.Image, *, lang: str = "spa", psm: int = 6) -> OCRResult:
+def run_tesseract(
+    image: Image.Image,
+    *,
+    lang: str = "spa",
+    psm: int = 6,
+    timeout: float | None = None,
+) -> OCRResult:
     if psm not in {3, 4, 6, 11}:
         raise ValueError("PSM admitidos: 3, 4, 6 y 11.")
     if not lang.isalpha() or len(lang) > 12:
         raise ValueError("Codigo de idioma invalido.")
+
+    timeout_seconds = timeout if timeout is not None else tesseract_timeout_for_image(image)
     start = time.perf_counter()
-    text = pytesseract.image_to_string(
-        image,
-        lang=lang,
-        config=f"--oem 1 --psm {psm}",
-        timeout=45,
-    )
+    try:
+        text = pytesseract.image_to_string(
+            image,
+            lang=lang,
+            config=f"--oem 1 --psm {psm}",
+            timeout=timeout_seconds,
+        )
+    except Exception as exc:
+        detail = str(exc)
+        message = detail if detail else "Tesseract process timeout"
+        raise RuntimeError(message[:220]) from exc
+
     return OCRResult(
         engine="Tesseract",
         text=text.strip(),
