@@ -112,7 +112,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-brand_path = ROOT / "Logotipo OpenScan OCR transparente.png"
+brand_path = ROOT / "assets" / "brand" / "openscan-logo-primary.png"
 if brand_path.exists():
     with open(brand_path, "rb") as img_file:
         encoded = __import__("base64").b64encode(img_file.read()).decode("utf-8")

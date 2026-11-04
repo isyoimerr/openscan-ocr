@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Logo OpenScan OCR moderno y minimalista.png" alt="OpenScan OCR logo" width="520" />
+  <img src="assets/brand/openscan-logo-primary.png" alt="OpenScan OCR logo" width="520" />
 </p>
 
 <h1 align="center">OpenScan OCR</h1>
