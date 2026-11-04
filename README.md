@@ -6,7 +6,9 @@
 
 <p align="center">
   <strong>OCR abierto para documentos escaneados, imágenes y flujos reproducibles.</strong><br />
-  <a href="https://openscan-ocr.onrender.com/">Probar demo</a> ·
+  <a href="https://openscan-ocr.onrender.com/" style="display:inline-block; padding:14px 28px; margin:18px 0 10px; border-radius:12px; background:linear-gradient(135deg,#19d7c4,#2fa8ff); color:#031726; text-decoration:none; font-weight:800; font-size:1.05rem; box-shadow:0 12px 24px rgba(25,215,196,0.35);">Probar demo</a>
+</p>
+<p align="center">
   <a href="https://colab.research.google.com/github/isyoimerr/openscan-ocr/blob/main/research/openscan_public_demo.ipynb">Abrir en Colab</a> ·
   <a href="research/ANALISIS_RESULTADOS.md">Ver investigación</a> ·
   <a href="CONTRIBUTING.md">Contribuir</a>
