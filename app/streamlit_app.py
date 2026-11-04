@@ -40,19 +40,72 @@ st.markdown(
     .block-container {max-width: 1220px; padding-top: 2rem;}
     [data-testid="stMetric"] {padding: 14px 18px; border: 1px solid #263B4D;
          border-radius: 12px; background: #111E2E;}
-    .hero {background: linear-gradient(110deg, #0F2233 0%, #102B3A 50%, #0B1E29 100%);
-           border: 1px solid #294358; padding: 28px 32px; border-radius: 18px;
-           margin-bottom: 24px; display: flex; align-items: center; gap: 26px;}
-    .brand-mark {width: 116px; height: 116px; border-radius: 28px; overflow: hidden;}
+    .hero {
+      background: linear-gradient(110deg, #0a1d2d 0%, #102a3c 55%, #0d2230 100%);
+      border: 1px solid rgba(82, 160, 182, 0.28);
+      border-radius: 18px;
+      padding: 28px 30px;
+      margin-bottom: 26px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 30px rgba(7,17,27,0.28);
+    }
+    .brand-mark-wrap {
+      width: 122px;
+      height: 122px;
+      border-radius: 28px;
+      background: rgba(15, 32, 45, 0.75);
+      border: 1px solid rgba(90, 222, 211, 0.44);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.22);
+      flex-shrink: 0;
+    }
+    .brand-mark-wrap img {
+      width: 92px;
+      height: 92px;
+      display: block;
+      object-fit: contain;
+    }
     .brand-copy {display: flex; flex-direction: column; justify-content: center;}
-    .brand-copy h1 {font-size: 2.6rem; margin: 0; letter-spacing: -0.06em; line-height: 1.1;}
-    .brand-copy p {font-size: 1rem; color: #B7CDD8; margin: 0; max-width: 700px;}
-    .eyebrow {color: #3AD9C3; letter-spacing: 0.15em; text-transform: uppercase;
-              font-size: 0.72rem; font-weight: 700; margin-bottom: 8px;}
+    .brand-copy h1 {
+      font-size: 2.65rem;
+      margin: 0;
+      letter-spacing: -0.06em;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+    .brand-copy p {
+      font-size: 1.02rem;
+      color: #B7CDD8;
+      margin: 0;
+      max-width: 760px;
+      line-height: 1.45;
+    }
+    .eyebrow {
+      color: #3AD9C3;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
     @media (max-width: 720px) {
-      .hero {flex-direction: column; align-items: flex-start;}
-      .brand-mark {width: 90px; height: 90px;}
+      .hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 22px 20px;
+      }
+      .brand-mark-wrap {
+        width: 88px;
+        height: 88px;
+        border-radius: 22px;
+      }
+      .brand-mark-wrap img { width: 68px; height: 68px; }
       .brand-copy h1 {font-size: 2rem;}
+      .brand-copy p {font-size: 0.95rem;}
     }
     </style>
     """,
@@ -61,31 +114,28 @@ st.markdown(
 
 brand_path = ROOT / "assets" / "brand" / "openscan-mark.png"
 if brand_path.exists():
-    brand_col, copy_col = st.columns([0.22, 1.2], gap="small")
-    with brand_col:
-        st.image(str(brand_path), width=120)
-    with copy_col:
-        st.markdown(
-            """
-            <div class="hero">
-              <div class="brand-copy">
-                <div class="eyebrow">OPEN SOURCE &nbsp; / &nbsp; OCR TOOLKIT</div>
-                <h1>OpenScan OCR</h1>
-                <p>Convierte imagenes y PDF escaneados en texto utilizable.
-                   Procesa documentos, compara metodos y exporta resultados.</p>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    with open(brand_path, "rb") as img_file:
+        encoded = __import__("base64").b64encode(img_file.read()).decode("utf-8")
+    hero_html = f"""
+    <div class="hero">
+      <div class="brand-mark-wrap">
+        <img src="data:image/png;base64,{encoded}" alt="OpenScan logo" />
+      </div>
+      <div class="brand-copy">
+        <div class="eyebrow">OPEN SOURCE &nbsp; / &nbsp; OCR TOOLKIT</div>
+        <h1>OpenScan OCR</h1>
+        <p>Convierte imagenes y PDF escaneados en texto utilizable. Procesa documentos, compara metodos y exporta resultados.</p>
+      </div>
+    </div>
+    """
+    st.markdown(hero_html, unsafe_allow_html=True)
 else:
     st.markdown(
         """
         <div class="hero">
           <div class="eyebrow">OPEN SOURCE &nbsp; / &nbsp; OCR TOOLKIT</div>
           <h1>OpenScan OCR</h1>
-          <p>Convierte imagenes y PDF escaneados en texto utilizable.
-             Procesa documentos, compara metodos y exporta resultados.</p>
+          <p>Convierte imagenes y PDF escaneados en texto utilizable. Procesa documentos, compara metodos y exporta resultados.</p>
         </div>
         """,
         unsafe_allow_html=True,
